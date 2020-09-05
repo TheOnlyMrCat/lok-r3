@@ -48,7 +48,7 @@ pub struct Block {
 #[derive(Debug)]
 pub enum Statement {
 	Eval(Expression),
-	Return(Expression),
+	Return(Option<Expression>),
 	Let {
 		expected_type: Option<TypeRef>,
 		var: Identifier,

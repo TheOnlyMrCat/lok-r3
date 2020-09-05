@@ -84,8 +84,11 @@ Statement: Statement = {
 			is_mut: m.is_some(),
 		}
 	},
+	"return" ";" => {
+		Statement::Return(None)
+	},
 	"return" <Expression> ";" => {
-		Statement::Return(<>)
+		Statement::Return(Some(<>))
 	},
 	<Expression> ";" => {
 		Statement::Eval(<>)

@@ -176,14 +176,13 @@ impl Block {
 					expr.codegen(compiler, module, value, &builder, &variables);
 				},
 				Statement::Return(expr) => {
-					let value = expr.codegen(compiler, module, value, &builder, &variables);
-					match value {
-						Some(v) => {
-							builder.build_return(Some(&v));
+					match expr {
+						Some(x) => {
+							builder.build_return(Some(&x.codegen(compiler, module, value, &builder, &variables).unwrap()));
 						},
 						None => {
 							builder.build_return(None);
-						}
+						},
 					}
 					has_returned = true;
 				}
