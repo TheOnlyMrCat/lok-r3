@@ -1,0 +1,122 @@
+use crate::lexer::{LexicalError, Token};
+use crate::syntax::*;
+
+grammar(filename: &str);
+
+extern {
+	type Location = usize;
+	type Error = LexicalError;
+
+	enum Token {
+		ID => Token::Identifier(<String>),
+		INT => Token::Integer(<i32>),
+		"let" => Token::KWLet,
+		"mut" => Token::KWMut,
+		"fn" => Token::KWFn,
+		"extern" => Token::KWExtern,
+		"const" => Token::KWConst,
+		"return" => Token::KWReturn,
+		"(" => Token::SOP,
+		")" => Token::SCP,
+		"{" => Token::SOB,
+		"}" => Token::SCB,
+		";" => Token::SSC,
+		"," => Token::SCM,
+		"*" => Token::SST,
+		"=" => Token::SSQ,
+	}
+}
+
+pub Lok: SyntaxTree = {
+	DeclSet => SyntaxTree { decls: <>, module_name: filename.to_owned() }
+}
+
+DeclSet: DeclSet = {
+	<mut s:DeclSet> <f:Function> => {
+		s.functions.push(f);
+		s
+	},
+	=> DeclSet {
+		functions: vec![]
+	}
+}
+
+Function: FuncDecl = {
+	"extern" <t:TypeRef> <n:Identifier> "(" <a:Comma<(<TypeRef> Identifier?)>> ")" ";" => {
+		FuncDecl::Extern(ExternFunction {
+			name: n,
+			returns: Some(t),
+			params: a,
+		})
+	},
+	<t:TypeRef> <n:Identifier> "(" <a:Comma<(TypeRef Identifier)>> ")" <b:Block> => {
+		FuncDecl::Intern(Function {
+			name: n,
+			returns: Some(t),
+			params: a,
+			body: b,
+		})
+	},
+	"fn" <n:Identifier> "(" <a:Comma<(TypeRef Identifier)>> ")" <b:Block> => {
+		FuncDecl::Intern(Function {
+			name: n,
+			returns: None,
+			params: a,
+			body: b,
+		})
+	},
+}
+
+Block: Block = {
+	"{" <s:Statement*> "}" => {
+		Block {
+			statements: s,
+		}
+	}
+}
+
+Statement: Statement = {
+	"let" <m:"mut"?> <t:TypeRef?> <n:Identifier> "=" <e:Expression> ";" => {
+		Statement::Let {
+			expected_type: t,
+			var: n,
+			val: e,
+			is_mut: m.is_some(),
+		}
+	},
+	"return" <Expression> ";" => {
+		Statement::Return(<>)
+	},
+	<Expression> ";" => {
+		Statement::Eval(<>)
+	}
+}
+
+Expression: Expression = {
+	INT => Expression::Int(<>),
+	Identifier => Expression::Var(<>),
+	<e:Identifier> "(" <a:Comma<Expression>> ")" => Expression::Call(e, a.into_iter().map(|x| Box::new(x)).collect()),
+	"(" <e:Expression> ")" => e
+}
+
+TypeRef: TypeRef = {
+	"*" "const" <TypeRef> => TypeRef::ConstPtr(Box::new(<>)),
+	"*" "mut" <TypeRef> => TypeRef::MutPtr(Box::new(<>)),
+	<Identifier> => TypeRef::Name(<>),
+}
+
+Identifier: Identifier = {
+	<ID> => <>
+}
+
+Comma<T>: Vec<T> = {
+	<o:(<T> <("," <T>)*> ","?)?> => match o {
+		Some((e, mut v)) => {
+			let mut n = Vec::with_capacity(v.len() + 1);
+			n.push(e);
+			n.append(&mut v);
+			n
+		},
+		None => vec![]
+	}
+}

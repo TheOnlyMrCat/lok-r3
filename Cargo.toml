@@ -1,0 +1,27 @@
+[package]
+name = "lok"
+version = "0.1.0"
+authors = ["TheOnlyMrCat <signupforforums5@gmail.com>"]
+edition = "2018"
+
+[features]
+default = []
+llvm3-6 = ["inkwell/llvm3-6"]
+llvm3-7 = ["inkwell/llvm3-7"]
+llvm3-8 = ["inkwell/llvm3-8"]
+llvm3-9 = ["inkwell/llvm3-9"]
+llvm4-0 = ["inkwell/llvm4-0"]
+llvm5-0 = ["inkwell/llvm5-0"]
+llvm6-0 = ["inkwell/llvm6-0"]
+llvm7-0 = ["inkwell/llvm7-0"]
+llvm8-0 = ["inkwell/llvm8-0"]
+llvm9-0 = ["inkwell/llvm9-0"]
+llvm10-0 = ["inkwell/llvm10-0"]
+
+[build-dependencies]
+lalrpop = "0.19"
+cc = "1.0"
+
+[dependencies]
+lalrpop-util = "0.19"
+inkwell = "0.1.0-llvm10sample"

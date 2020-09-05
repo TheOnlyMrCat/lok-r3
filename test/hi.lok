@@ -1,0 +1,11 @@
+extern i32 putchar(i32);
+
+fn main() {
+	let i32 int = createInt();
+	putchar(int);
+	putchar(10);
+}
+
+i32 createInt() {
+	return 64;
+}

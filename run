@@ -1,0 +1,29 @@
+#- b!
+run flex
+cargo build
+#/
+
+#-
+run flex
+cargo run --features llvm10-0 -- test/hi.lok
+ld -lc output.o
+rm output.o
+./a.out
+#/
+
+#pkg
+run flex-pkg
+cargo build --release
+#/
+
+#flex
+flex -d -o src/gen/lexer.c src/lexer.l
+#/
+
+#flex-bak
+flex -b -Cfe -o src/gen/lexer.c src/lexer.l
+#/
+
+#flex-pkg
+flex -Cfe -o src/gen/lexer.c src/lexer.l
+#/
