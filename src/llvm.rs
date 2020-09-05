@@ -103,7 +103,7 @@ impl DeclSet {
 	fn codegen<'ctx>(&self, compiler: &'ctx Compiler, module: &Module<'ctx>) {
 		// Do structs first, but they don't exist yet
 
-		// Functions; first know what the all are
+		// Functions; first know what they all are
 		let mut functions: Vec<(&Function, FunctionValue<'ctx>)> = vec![];
 		for func in &self.functions {
 			match func {
@@ -156,6 +156,7 @@ impl Block {
 		let mut has_returned = false;
 
 		for statement in &self.statements {
+			assert!(!has_returned, "Statement after return");
 			match statement {
 				Statement::Let { var: name, val, expected_type, .. } => {
 					if let Some(i) = block.get_first_instruction() {
@@ -163,9 +164,7 @@ impl Block {
 					} // Otherwise the builder's already at the start anyway
 					let expr_value = val.codegen(compiler, module, value, &builder, &variables).unwrap();
 					if let Some(ty) = expected_type {
-						if compiler.get_type(ty) != expr_value.get_type() {
-							panic!("Expression type doesn't match expected type!"); // basically an unwrap (this comment is here just so I can search for "unwrap" when implementing errors properly)
-						}
+						assert_eq!(compiler.get_type(ty), expr_value.get_type(), "Expression type doesn't match expected type!"); // basically an unwrap (this comment is here just so I can search for "unwrap" when implementing errors properly)
 					}
 					let ptr = builder.build_alloca(expr_value.get_type(), &name);
 					builder.position_at_end(block);
@@ -178,7 +177,9 @@ impl Block {
 				Statement::Return(expr) => {
 					match expr {
 						Some(x) => {
-							builder.build_return(Some(&x.codegen(compiler, module, value, &builder, &variables).unwrap()));
+							let expr_value = x.codegen(compiler, module, value, &builder, &variables).unwrap();
+							assert_eq!(expr_value.get_type(), value.get_type().get_return_type().unwrap());
+							builder.build_return(Some(&expr_value));
 						},
 						None => {
 							builder.build_return(None);
