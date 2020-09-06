@@ -25,7 +25,11 @@ extern {
 		"]" => Token::SCK,
 		";" => Token::SSC,
 		"," => Token::SCM,
+		"+" => Token::SPL,
+		"-" => Token::SHP,
 		"*" => Token::SST,
+		"/" => Token::SFS,
+		"%" => Token::SPC,
 		"=" => Token::SSQ,
 	}
 }
@@ -99,12 +103,29 @@ Statement: Statement = {
 }
 
 Expression: Expression = {
+	ExpressionSum => <>
+}
+
+ExpressionSum: Expression = {
+	<a:ExpressionSum> "+" <b:ExpressionFactor> => Expression::Add(Box::new(a), Box::new(b)),
+	<a:ExpressionSum> "-" <b:ExpressionFactor> => Expression::Sub(Box::new(a), Box::new(b)),
+	ExpressionFactor => <>,
+}
+
+ExpressionFactor: Expression = {
+	<a:ExpressionFactor> "*" <b:ExpressionValue> => Expression::Mul(Box::new(a), Box::new(b)),
+	<a:ExpressionFactor> "/" <b:ExpressionValue> => Expression::Div(Box::new(a), Box::new(b)),
+	<a:ExpressionFactor> "%" <b:ExpressionValue> => Expression::Mod(Box::new(a), Box::new(b)),
+	ExpressionValue => <>,
+}
+
+ExpressionValue: Expression = {
 	INT => Expression::Int(<>),
 	FLOAT => Expression::Float(<>),
 	Identifier => Expression::Var(<>),
 	"[" <Comma<Expression>> "]" => Expression::Array(<>),
 	<e:Identifier> "(" <a:Comma<Expression>> ")" => Expression::Call(e, a.into_iter().map(|x| Box::new(x)).collect()),
-	"(" <e:Expression> ")" => e
+	"(" <e:Expression> ")" => e,
 }
 
 TypeRef: TypeRef = {

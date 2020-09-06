@@ -18,7 +18,11 @@ enum TokenType {
 	CLOSEBRACKET,
 	SEMICOLON,
 	COMMA,
+	PLUS,
+	HYPHEN,
 	STAR,
+	SLASH,
+	PERCENT,
 	EQUALS,
 
 	IDENTIFIER,
@@ -67,7 +71,11 @@ return return RETURN;
 "]" return CLOSEBRACKET;
 ";" return SEMICOLON;
 "," return COMMA;
+"+" return PLUS;
+"-" return HYPHEN;
 "*" return STAR;
+"/" return SLASH;
+"%" return PERCENT;
 "=" return EQUALS;
 
 <<EOF>>  return END;

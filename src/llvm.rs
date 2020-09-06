@@ -63,11 +63,11 @@ impl Compiler {
 	fn get_type<'ctx>(&'ctx self, type_ref: &TypeRef) -> BasicTypeEnum<'ctx> {
 		match type_ref {
 			TypeRef::MutPtr(internal) |
-			TypeRef::ConstPtr(internal) => BasicTypeEnum::PointerType(self.get_type(&internal).ptr_type(AddressSpace::Generic)),
-			TypeRef::Array(internal, size) => BasicTypeEnum::ArrayType(self.get_type(internal).array_type(*size as u32)),
+			TypeRef::ConstPtr(internal) => self.get_type(&internal).ptr_type(AddressSpace::Generic).into(),
+			TypeRef::Array(internal, size) => self.get_type(internal).array_type(*size as u32).into(),
 			TypeRef::Name(id) => match &**id {
-				"i32" => BasicTypeEnum::IntType(self.i32_type()),
-				"f64" => BasicTypeEnum::FloatType(self.f64_type()),
+				"i32" => self.i32_type().into(),
+				"f64" => self.f64_type().into(),
 				_ => todo!(),
 			}
 		}
@@ -75,7 +75,7 @@ impl Compiler {
 
 	fn extrapolate_type<'ctx>(&'ctx self, module: &Module<'ctx>, expr: &Expression) -> BasicTypeEnum<'ctx> {
 		match expr {
-			Expression::Int(_) => BasicTypeEnum::IntType(self.i32_type()),
+			Expression::Int(_) => self.i32_type().into(),
 			Expression::Call(id, ..) => module.get_function(&id).unwrap().get_type().get_return_type().unwrap(),
 			_ => todo!()
 		}
@@ -219,6 +219,31 @@ impl Expression {
 				builder.build_call(callee, &arguments, "calltmp").try_as_basic_value().left()
 			},
 			Expression::Var(id) => Some(builder.build_load(*variables.get(id).unwrap(), "loadtmp")),
+			Expression::Add(a, b) => {
+				let side_a = a.codegen(compiler, module, function, builder, variables).unwrap();
+				let side_b = b.codegen(compiler, module, function, builder, variables).unwrap();
+				match side_a.get_type() {
+					BasicTypeEnum::IntType(t_a) => {
+						match side_b.get_type() {
+							BasicTypeEnum::IntType(t_b) => {
+								assert_eq!(t_a, t_b, "Cannot add integers of different sizes");
+								Some(builder.build_int_add(side_a.into_int_value(), side_b.into_int_value(), "addtmp").into())
+							},
+							_ => todo!(),
+						}
+					},
+					BasicTypeEnum::FloatType(t_a) => {
+						match side_b.get_type() {
+							BasicTypeEnum::FloatType(t_b) => {
+								assert_eq!(t_a, t_b, "Cannot add floats of different sizes");
+								Some(builder.build_float_add(side_a.into_float_value(), side_b.into_float_value(), "addtmp").into())
+							},
+							_ => todo!(),
+						}
+					},
+					_ => todo!(),
+				}
+			}
 			_ => todo!(),
 		}
 	}

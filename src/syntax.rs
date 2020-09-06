@@ -69,4 +69,5 @@ pub enum Expression {
 	Sub(Box<Expression>, Box<Expression>),
 	Mul(Box<Expression>, Box<Expression>),
 	Div(Box<Expression>, Box<Expression>),
+	Mod(Box<Expression>, Box<Expression>),
 }

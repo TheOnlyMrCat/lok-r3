@@ -20,7 +20,11 @@ enum CTokenType {
 	CloseBrk,
 	Semicolon,
 	Comma,
+	Plus,
+	Hyphen,
 	Star,
+	Slash,
+	Percent,
 	Equals,
 
 	Identifier,
@@ -59,7 +63,11 @@ pub enum Token {
 	SCK,
 	SSC,
 	SCM,
+	SPL,
+	SHP,
 	SST,
+	SFS,
+	SPC,
 	SSQ,
 	Identifier(String),
 	Integer(i32),
@@ -133,8 +141,12 @@ impl Iterator for Lexer {
 			CTokenType::CloseBrk => Some(Ok((start_loc, Token::SCK, self.loc))),
 			CTokenType::Semicolon => Some(Ok((start_loc, Token::SSC, self.loc))),
 			CTokenType::Comma => Some(Ok((start_loc, Token::SCM, self.loc))),
+			CTokenType::Plus => Some(Ok((start_loc, Token::SPL, self.loc))),
+			CTokenType::Hyphen => Some(Ok((start_loc, Token::SHP, self.loc))),
 			CTokenType::Star => Some(Ok((start_loc, Token::SST, self.loc))),
 			CTokenType::Equals => Some(Ok((start_loc, Token::SSQ, self.loc))),
+			CTokenType::Percent => Some(Ok((start_loc, Token::SPC, self.loc))),
+			CTokenType::Slash => Some(Ok((start_loc, Token::SFS, self.loc))),
 		}
 	}
 }
