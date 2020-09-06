@@ -5,7 +5,7 @@ cargo build
 
 #-
 run flex
-cargo run --features llvm10-0 -- test/hi.lok
+cargo run --features llvm10-0 -- test/types.lok
 ld -lc output.o
 rm output.o
 ./a.out

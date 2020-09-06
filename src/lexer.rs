@@ -16,6 +16,8 @@ enum CTokenType {
 	ClosePar,
 	OpenBra,
 	CloseBra,
+	OpenBrk,
+	CloseBrk,
 	Semicolon,
 	Comma,
 	Star,
@@ -23,6 +25,7 @@ enum CTokenType {
 
 	Identifier,
 	Integer,
+	Float,
 	Invalid = 0x7F,
 }
 
@@ -52,12 +55,15 @@ pub enum Token {
 	SCP,
 	SOB,
 	SCB,
+	SOK,
+	SCK,
 	SSC,
 	SCM,
 	SST,
 	SSQ,
 	Identifier(String),
 	Integer(i32),
+	Float(f64),
 }
 
 #[derive(Clone, Debug)]
@@ -106,6 +112,11 @@ impl Iterator for Lexer {
 				t.retain(|c| c != '_');
 				i32::from_str_radix(&t, 10).unwrap()
 			}), self.loc))),
+			CTokenType::Float => Some(Ok((start_loc, Token::Float({
+				let mut t = text.to_owned();
+				t.retain(|c| c != '_');
+				<f64 as std::str::FromStr>::from_str(&t).unwrap()
+			}), self.loc))),
 
 			CTokenType::Let => Some(Ok((start_loc, Token::KWLet, self.loc))),
 			CTokenType::Mut => Some(Ok((start_loc, Token::KWMut, self.loc))),
@@ -118,6 +129,8 @@ impl Iterator for Lexer {
 			CTokenType::ClosePar => Some(Ok((start_loc, Token::SCP, self.loc))),
 			CTokenType::OpenBra => Some(Ok((start_loc, Token::SOB, self.loc))),
 			CTokenType::CloseBra => Some(Ok((start_loc, Token::SCB, self.loc))),
+			CTokenType::OpenBrk => Some(Ok((start_loc, Token::SOK, self.loc))),
+			CTokenType::CloseBrk => Some(Ok((start_loc, Token::SCK, self.loc))),
 			CTokenType::Semicolon => Some(Ok((start_loc, Token::SSC, self.loc))),
 			CTokenType::Comma => Some(Ok((start_loc, Token::SCM, self.loc))),
 			CTokenType::Star => Some(Ok((start_loc, Token::SST, self.loc))),

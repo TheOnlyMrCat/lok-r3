@@ -11,6 +11,7 @@ pub enum TypeRef {
 	Name(Identifier),
 	ConstPtr(Box<TypeRef>),
 	MutPtr(Box<TypeRef>),
+	Array(Box<TypeRef>, usize),
 }
 
 #[derive(Debug)]
@@ -60,7 +61,9 @@ pub enum Statement {
 #[derive(Debug)]
 pub enum Expression {
 	Int(i32),
+	Float(f64),
 	Var(Identifier),
+	Array(Vec<Expression>),
 	Call(Identifier, Vec<Box<Expression>>),
 	Add(Box<Expression>, Box<Expression>),
 	Sub(Box<Expression>, Box<Expression>),

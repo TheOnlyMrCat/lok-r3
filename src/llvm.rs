@@ -7,8 +7,8 @@ use inkwell::builder::Builder;
 use inkwell::passes::PassManager;
 use inkwell::module::{Module, Linkage};
 use inkwell::targets::{Target, TargetMachine, RelocMode, CodeModel, FileType, InitializationConfig};
-use inkwell::types::{BasicType, BasicTypeEnum};
-use inkwell::values::{FunctionValue, PointerValue, BasicValueEnum};
+use inkwell::types::{BasicType, StructType, BasicTypeEnum};
+use inkwell::values::{FunctionValue, PointerValue, StructValue, BasicValueEnum};
 use inkwell::{AddressSpace, OptimizationLevel};
 
 pub struct Compiler {
@@ -18,6 +18,7 @@ pub struct Compiler {
 }
 
 impl Compiler {
+	#[inline]
 	pub fn new() -> Compiler {
 		Compiler::with_context(Context::create())
 	}
@@ -63,8 +64,10 @@ impl Compiler {
 		match type_ref {
 			TypeRef::MutPtr(internal) |
 			TypeRef::ConstPtr(internal) => BasicTypeEnum::PointerType(self.get_type(&internal).ptr_type(AddressSpace::Generic)),
+			TypeRef::Array(internal, size) => BasicTypeEnum::ArrayType(self.get_type(internal).array_type(*size as u32)),
 			TypeRef::Name(id) => match &**id {
 				"i32" => BasicTypeEnum::IntType(self.i32_type()),
+				"f64" => BasicTypeEnum::FloatType(self.f64_type()),
 				_ => todo!(),
 			}
 		}
@@ -76,6 +79,14 @@ impl Compiler {
 			Expression::Call(id, ..) => module.get_function(&id).unwrap().get_type().get_return_type().unwrap(),
 			_ => todo!()
 		}
+	}
+
+	fn get_zero_type<'ctx>(&'ctx self) -> StructType<'ctx> {
+		self.struct_type(&[], false)
+	}
+
+	fn get_zero_value<'ctx>(&'ctx self) -> StructValue<'ctx> {
+		self.const_struct(&[], false)
 	}
 }
 
@@ -94,7 +105,7 @@ impl SyntaxTree {
 		module.set_triple(&compiler.target_machine.get_triple());
 
 		self.decls.codegen(compiler, &module);
-		compiler.pass_over(&module);
+		// compiler.pass_over(&module);
 		module
 	}
 }
@@ -200,7 +211,8 @@ impl Block {
 impl Expression {
 	fn codegen<'ctx>(&self, compiler: &'ctx Compiler, module: &Module<'ctx>, function: FunctionValue<'ctx>, builder: &Builder<'ctx>, variables: &HashMap<String, PointerValue<'ctx>>) -> Option<BasicValueEnum<'ctx>> {
 		match self {
-			Expression::Int(i) => Some(BasicValueEnum::IntValue(compiler.i32_type().const_int(*i as u64, true))),
+			Expression::Int(i) => Some(BasicValueEnum::IntValue(compiler.i32_type().const_int(*i as u64, true))), //TODO Other int types???
+			Expression::Float(f) => Some(BasicValueEnum::FloatValue(compiler.f64_type().const_float(*f))),
 			Expression::Call(name, args) => {
 				let callee = module.get_function(&name).unwrap();
 				let arguments = args.iter().map(|expr| expr.codegen(compiler, module, function, builder, variables)).collect::<Option<Vec<_>>>()?;

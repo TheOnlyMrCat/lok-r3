@@ -10,6 +10,7 @@ extern {
 	enum Token {
 		ID => Token::Identifier(<String>),
 		INT => Token::Integer(<i32>),
+		FLOAT => Token::Float(<f64>),
 		"let" => Token::KWLet,
 		"mut" => Token::KWMut,
 		"fn" => Token::KWFn,
@@ -20,6 +21,8 @@ extern {
 		")" => Token::SCP,
 		"{" => Token::SOB,
 		"}" => Token::SCB,
+		"[" => Token::SOK,
+		"]" => Token::SCK,
 		";" => Token::SSC,
 		"," => Token::SCM,
 		"*" => Token::SST,
@@ -97,7 +100,9 @@ Statement: Statement = {
 
 Expression: Expression = {
 	INT => Expression::Int(<>),
+	FLOAT => Expression::Float(<>),
 	Identifier => Expression::Var(<>),
+	"[" <Comma<Expression>> "]" => Expression::Array(<>),
 	<e:Identifier> "(" <a:Comma<Expression>> ")" => Expression::Call(e, a.into_iter().map(|x| Box::new(x)).collect()),
 	"(" <e:Expression> ")" => e
 }
@@ -105,6 +110,7 @@ Expression: Expression = {
 TypeRef: TypeRef = {
 	"*" "const" <TypeRef> => TypeRef::ConstPtr(Box::new(<>)),
 	"*" "mut" <TypeRef> => TypeRef::MutPtr(Box::new(<>)),
+	"[" <t:TypeRef> ";" <i:INT> "]" => TypeRef::Array(Box::new(t), i as usize),
 	<Identifier> => TypeRef::Name(<>),
 }
 

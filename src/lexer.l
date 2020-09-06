@@ -14,6 +14,8 @@ enum TokenType {
 	CLOSEPAR,
 	OPENBRACE,
 	CLOSEBRACE,
+	OPENBRACKET,
+	CLOSEBRACKET,
 	SEMICOLON,
 	COMMA,
 	STAR,
@@ -21,6 +23,7 @@ enum TokenType {
 
 	IDENTIFIER,
 	INTEGER,
+	FLOAT,
 	NEWLINES = 0x7E, // Doesn't get revealed to rust
 	INVALID = 0x7F,
 };
@@ -54,11 +57,14 @@ return return RETURN;
 [[:alpha:]_][[:alnum:]_]* return IDENTIFIER;
 
 [[:digit:]_]+ return INTEGER;
+[[:digit:]_]+"."[[:digit:]_]+ return FLOAT;
 
 "(" return OPENPAR;
 ")" return CLOSEPAR;
 "{" return OPENBRACE;
 "}" return CLOSEBRACE;
+"[" return OPENBRACKET;
+"]" return CLOSEBRACKET;
 ";" return SEMICOLON;
 "," return COMMA;
 "*" return STAR;
