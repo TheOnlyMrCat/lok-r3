@@ -2,5 +2,6 @@ i32 main() {
 	let float = 1.0;
 	let another_float = float + 0.5;
 	let yet_another_float = float + another_float + 2.25;
+	let calculation = float + another_float * yet_another_float - another_float / yet_another_float % another_float;
 	return 0;
 }

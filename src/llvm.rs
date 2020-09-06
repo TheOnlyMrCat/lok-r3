@@ -243,6 +243,106 @@ impl Expression {
 					},
 					_ => todo!(),
 				}
+			},
+			Expression::Sub(a, b) => {
+				let side_a = a.codegen(compiler, module, function, builder, variables).unwrap();
+				let side_b = b.codegen(compiler, module, function, builder, variables).unwrap();
+				match side_a.get_type() {
+					BasicTypeEnum::IntType(t_a) => {
+						match side_b.get_type() {
+							BasicTypeEnum::IntType(t_b) => {
+								assert_eq!(t_a, t_b, "Cannot subtrat integers of different sizes");
+								Some(builder.build_int_sub(side_a.into_int_value(), side_b.into_int_value(), "subtmp").into())
+							},
+							_ => todo!(),
+						}
+					},
+					BasicTypeEnum::FloatType(t_a) => {
+						match side_b.get_type() {
+							BasicTypeEnum::FloatType(t_b) => {
+								assert_eq!(t_a, t_b, "Cannot subtract floats of different sizes");
+								Some(builder.build_float_sub(side_a.into_float_value(), side_b.into_float_value(), "subtmp").into())
+							},
+							_ => todo!(),
+						}
+					},
+					_ => todo!(),
+				}
+			},
+			Expression::Mul(a, b) => {
+				let side_a = a.codegen(compiler, module, function, builder, variables).unwrap();
+				let side_b = b.codegen(compiler, module, function, builder, variables).unwrap();
+				match side_a.get_type() {
+					BasicTypeEnum::IntType(t_a) => {
+						match side_b.get_type() {
+							BasicTypeEnum::IntType(t_b) => {
+								assert_eq!(t_a, t_b, "Cannot multiply integers of different sizes");
+								Some(builder.build_int_mul(side_a.into_int_value(), side_b.into_int_value(), "multmp").into())
+							},
+							_ => todo!(),
+						}
+					},
+					BasicTypeEnum::FloatType(t_a) => {
+						match side_b.get_type() {
+							BasicTypeEnum::FloatType(t_b) => {
+								assert_eq!(t_a, t_b, "Cannot multiply floats of different sizes");
+								Some(builder.build_float_mul(side_a.into_float_value(), side_b.into_float_value(), "multmp").into())
+							},
+							_ => todo!(),
+						}
+					},
+					_ => todo!(),
+				}
+			},
+			Expression::Div(a, b) => {
+				let side_a = a.codegen(compiler, module, function, builder, variables).unwrap();
+				let side_b = b.codegen(compiler, module, function, builder, variables).unwrap();
+				match side_a.get_type() {
+					BasicTypeEnum::IntType(t_a) => {
+						match side_b.get_type() {
+							BasicTypeEnum::IntType(t_b) => {
+								assert_eq!(t_a, t_b, "Cannot divide integers of different sizes");
+								Some(builder.build_int_signed_div(side_a.into_int_value(), side_b.into_int_value(), "divtmp").into())
+							},
+							_ => todo!(),
+						}
+					},
+					BasicTypeEnum::FloatType(t_a) => {
+						match side_b.get_type() {
+							BasicTypeEnum::FloatType(t_b) => {
+								assert_eq!(t_a, t_b, "Cannot divide floats of different sizes");
+								Some(builder.build_float_div(side_a.into_float_value(), side_b.into_float_value(), "divtmp").into())
+							},
+							_ => todo!(),
+						}
+					},
+					_ => todo!(),
+				}
+			},
+			Expression::Mod(a, b) => {
+				let side_a = a.codegen(compiler, module, function, builder, variables).unwrap();
+				let side_b = b.codegen(compiler, module, function, builder, variables).unwrap();
+				match side_a.get_type() {
+					BasicTypeEnum::IntType(t_a) => {
+						match side_b.get_type() {
+							BasicTypeEnum::IntType(t_b) => {
+								assert_eq!(t_a, t_b, "Cannot mod integers of different sizes");
+								Some(builder.build_int_signed_rem(side_a.into_int_value(), side_b.into_int_value(), "modtmp").into())
+							},
+							_ => todo!(),
+						}
+					},
+					BasicTypeEnum::FloatType(t_a) => {
+						match side_b.get_type() {
+							BasicTypeEnum::FloatType(t_b) => {
+								assert_eq!(t_a, t_b, "Cannot mod floats of different sizes");
+								Some(builder.build_float_rem(side_a.into_float_value(), side_b.into_float_value(), "modtmp").into())
+							},
+							_ => todo!(),
+						}
+					},
+					_ => todo!(),
+				}
 			}
 			_ => todo!(),
 		}
